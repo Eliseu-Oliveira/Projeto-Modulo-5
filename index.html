@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="./assets/icon/logo.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="./assets/icon/logo.png">
+    <title>ULR ENCURTADOR</title>
+</head>
+
+<body>
+    <div class="conf">
+        <img src="assets/conf.png" alt="" id="conf-img">
+    </div>
+    <div class="container" id="container-principal">
+        <img src="assets/logo.png" alt="" class="logo">
+        <h1>Encurtador de Link</h1>
+        <form id="form">
+            <label for="url">Insira o URL:</label>
+            <input type="url" id="url" placeholder="Exemplo: https://www.exemplo.com" name="url" required>
+            <button type="submit" id="btn-encurtar">Encurtar</button>
+            <div id="url-feedback"></div>
+            <div id="msg-inicio" class="message">
+                <span id="msg-text"></span>
+            </div>
+    </div>
+    </form>
+    <div id="result"></div>
+
+
+    <div id="extra-div" class="extra-div">
+        <img src="./assets/logo.png" alt="Logo" class="logo" id="logo">
+        <h1>Encurtador de Link</h1>
+
+        <div>
+            <h2>Gerenciar Links</h2>
+            <p class="dominio">Domínio: <a href="" target="_blank">...</a></p>
+        </div>
+
+        <div class="msg" id="settings-msg" style="display: none;">
+        </div>
+
+        <div class="tabela-links">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Link Encurtado</th>
+                        <th>Link Original</th>
+                        <th>Data/Hora</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-de-links">
+                    <tr>
+                        <td colspan="4">Nenhum link disponível</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="return">
+        <a href="" target="_blank"></a>
+        <small></small>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2>Editar Link</h2>
+            <input type="text" id="slugInput" placeholder="Novo Slug">
+            <button id="salvarBtn">Salvar</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+
+</body>
+
+</html>
