@@ -173,18 +173,51 @@ button[type="submit"]:hover {
 .modal {
     display: none;
     position: fixed;
-    top: 0;
+    z-index: 9999;
     left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
 .modal-content {
-    background-color: white;
-    width: 300px;
-    margin: 100px auto;
+    background-color: #fefefe;
+    margin: 10% auto;
     padding: 20px;
+    border: 1px solid #888;
+    border-radius: 12px;
+    width: 25%;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.modal-buttons button {
+    margin-left: 10px;
+    padding: 5px 10px;
+}
+
+.modal-buttons button.salvar-edit {
+    background-color: green;
+    color: white;
+}
+
+.modal-buttons button.cancelar-edit {
+    background-color: red;
+    color: white;
+}
+
+.modal-buttons button:hover {
+    opacity: 0.8;
+    cursor: pointer;
+}
+
+.modal-buttons button {
+    margin-left: 10px;
 }
 
 /* Estilos para os botões */
@@ -256,17 +289,34 @@ button[type="submit"]:hover {
 .qr-code-container {
     display: none;
     position: absolute;
-    top: 80px;
+    top: 30px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1;
     background-color: #fff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    padding: 8px;
+    padding: 120px;
     border-radius: 4px;
+    /* background-color: red; */
+
 }
 
-.qr-code-container.show {
+.QrCont {
+    display: none;
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    padding: 120px;
+    border-radius: 4px;
+    /* background-color: red; */
+
+}
+
+qr-code-container.show {
     display: block;
 }
 

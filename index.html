@@ -30,6 +30,7 @@
     </form>
     <div id="result"></div>
 
+    <div id="QrCont" class="QrCont"></div>
 
     <div id="extra-div" class="extra-div">
         <img src="./assets/logo.png" alt="Logo" class="logo" id="logo">
@@ -67,17 +68,24 @@
         <small></small>
     </div>
 
-    <div id="modal" class="modal">
+    <div id="modalEditarLink" class="modal">
         <div class="modal-content">
-            <h2>Editar Link</h2>
-            <input type="text" id="slugInput" placeholder="Novo Slug">
-            <button id="salvarBtn">Salvar</button>
+            <label for="slug">Slug:</label>
+            <input type="text" id="slug">
+            <br>
+            <label for="url">URL Original:</label>
+            <input type="text" id="url" disabled>
+            <br>
+            <div class="modal-buttons">
+                <button class="salvar-edit btn">Salvar</button>
+                <button class="cancelar-edit btn">Cancelar</button>
+            </div>
         </div>
     </div>
 
+
     <script src="script.js"></script>
-
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </body>
 
 </html>

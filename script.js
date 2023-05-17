@@ -9,6 +9,7 @@ const msgInicio = document.getElementById('msg-inicio');
 const apiKey = 'sk_qiYiSepi1LRZRj8n';
 const domainId = '716308';
 const domainUrl = '96xu.short.gy';
+const QrCont = document.getElementById('QrCont');
 const form = document.getElementById('form');
 const urlInput = document.getElementById('url');
 const urlFeedback = document.getElementById('url-feedback');
@@ -18,10 +19,17 @@ const aLink = document.querySelector('.return a');
 const smallData = document.querySelector('.return small');
 const btnCopiar = document.createElement('button');
 const dominio = document.querySelector('.dominio');
+const btnSalvarEdit = document.querySelector('.salvar-edit');
+const fecharModal = document.querySelector('.fechar-modal');
+const divModais = document.querySelector('.modais');
+const divModalEditar = document.querySelector('.modal');
+const divModalEditarP = document.querySelector('.modal p');
+const divModalBoo = document.querySelector('.modal-boolean');
+const divModalBooP = document.querySelector('.modal-boolean');
 
 confImg.addEventListener('click', () => {
   const shouldHideContainer = containerPrincipal.style.display !== 'none';
-  const transitionDuration = 0.3; // Duração da transição em segundos
+  const transitionDuration = 0.3; 
 
   containerPrincipal.style.opacity = shouldHideContainer ? 0 : 1;
   containerPrincipal.style.transition = `opacity ${transitionDuration}s`;
@@ -66,7 +74,6 @@ function mostrarDominio() {
     .catch(err => console.error(err));
 }
 
-// Chame a função para exibir o domínio
 mostrarDominio();
 
 function validarURL() {
@@ -83,7 +90,7 @@ function validarURL() {
   setTimeout(() => {
     urlFeedback.innerHTML = '';
     urlInput.classList.remove('is-invalid');
-  }, 5000); // Tempo de 5 segundos
+  }, 5000); 
 
   return isUrlValid;
 }
@@ -245,22 +252,16 @@ function shareLinks(linkCurto, data, linkId) {
     shareList.style.display = 'block';
     shareList.classList.add('show-transition');
   });
-  
+
+  const btnQRCode = document.createElement('button');
+  btnQRCode.innerText = 'QR Code';
+  btnQRCode.classList.add('btn', 'btn-qrcode');
+  const qrCodeContainer = document.createElement('div');
+  qrCodeContainer.id = 'qr-code-container';
+
   btnQRCode.addEventListener('click', function () {
-    const qrCodeImage = new Image();
-    qrCodeImage.src = qrCodeImageUrl;
-    qrCodeImage.classList.add('qrcode');
-    qrCodeContainer.classList.add('qr-code-container');
-    qrCodeContainer.appendChild(qrCodeImage);
-    const qrCodeImageUrl = '/assets/qrcode.png';
-    qrCodeImage.src = qrCodeUrl;
-    const qrCodeContainer = document.createElement('div');
-    qrCodeContainer.classList.add('qr-code-container');
-    qrCodeContainer.appendChild(qrCodeImage);
-    const btnQRCode = document.createElement('button');
-    btnQRCode.innerText = 'QR Code';
-    btnQRCode.classList.add('btn', 'btn-qrcode');
-    document.body.appendChild(qrCodeContainer);
+    solicitaAcessoQR(linkId)
+    QrCont.style.display = "block";
   });
 
   const buttonContainer = document.createElement('div');
@@ -277,45 +278,41 @@ function shareLinks(linkCurto, data, linkId) {
     if (!shareList.contains(targetElement) && targetElement !== btnCompartilhar) {
       shareList.style.display = 'none';
     }
+    if (!QrCont.contains(targetElement) && targetElement !== btnQRCode) {
+      QrCont.style.display = 'none';
+    }
   });
 }
 
 
-function solicitaAcessoQR(apiKey, domainId) {
+function solicitaAcessoQR(linkId) {
   const options = {
-    method: 'GET',
-    headers: { accept: 'application/json', Authorization: apiKey },
+    method: 'POST',
+    headers: {
+      accept: 'image/png',
+      'content-type': 'application/json',
+      Authorization: apiKey
+    },
+    body: JSON.stringify({ type: 'png' })
   };
 
-  fetch(`https://api.short.io/links/qr/linkIdString', options`, options)
-
+  fetch('https://api.short.io/links/qr/' + linkId, options)
     .then(response => {
-      if (response.ok && response.status === 200) {
-        return response.json();
+      if (response.status === 201) {
+        console.log("Verificação de Resposta Positiva");
       } else {
-        throw new Error(`Resposta do servidor: ${response.status}`);
+        console.log("Verificação Negada");
       }
+      return response.blob()
     })
-    .then(response => {
-      listaLinks.innerHTML = `<tr>
-          <td colspan="4">Nenhum link listado</td>
-          </tr>`;
-
-      const linkCount = response.links.length;
-      if (linkCount <= 0) {
-        exibirMensagensInicio(false, 'Não há URLs criadas ainda!');
-      } else {
-        exibirMensagensInicio(true, 'Lista de URL disponível');
-      }
-
-      setTimeout(limparMensagens, 3500);
-      montaTabela(response.links);
+    .then(blob => {
+      const imageURL = URL.createObjectURL(blob);
+      const QRCode = document.createElement("img");
+      QRCode.src = imageURL;
+      const container = document.getElementById("QrCont");
+      container.appendChild(QRCode);
     })
-    .catch(err => {
-      console.error(err);
-      exibirMensagensInicio(false, 'Serviço indisponível!');
-      setTimeout(limparMensagens, 3500);
-    });
+    .catch(err => console.error(err));
 }
 
 
@@ -354,7 +351,7 @@ form.addEventListener('submit', (e) => {
 });
 
 
-function getShortLinks() {
+async function getShortLinks() {
   const apiKey = "sk_qiYiSepi1LRZRj8n";
   const domainId = "716308";
 
@@ -363,23 +360,18 @@ function getShortLinks() {
       Authorization: apiKey
     }
   };
-  fetch('https://api.short.io/api/links?domain_id=' + domainId + '&limit=30&dateSortOrder=desc', options)
 
-    .then(response => {
-      if (response.ok && response.status === 200) {
-        return response.json();
-      } else { throw new Error('Resposta do servidor: ', response.status) }
-    })
+  try {
+    const response = await fetch(`https://api.short.io/api/links?domain_id=${domainId}&limit=30&dateSortOrder=desc`, options);
 
-    .then(data => {
-      // Manipula a resposta da API e preenche a tabela no HTML
+    if (response.ok && response.status === 200) {
+      const data = await response.json();
+
       const listaLinks = document.getElementById("lista-de-links");
 
-      if (data.links.length >= 0) {
-        // Limpa a tabela
+      if (data.links.length > 0) {
         listaLinks.innerHTML = "";
 
-        // Preenche a tabela com os links
         data.links.forEach(link => {
           const row = listaLinks.insertRow();
           const linkEncurtadoCell = row.insertCell(0);
@@ -387,22 +379,24 @@ function getShortLinks() {
           const dataHoraCell = row.insertCell(2);
           const acaoCell = row.insertCell(3);
 
-          linkEncurtadoCell.innerHTML = '<a href="' + link.secureShortURL + '" target="_blank">' + link.secureShortURL + '</a>';
+          linkEncurtadoCell.innerHTML = `<a href="${link.secureShortURL}" target="_blank">${link.secureShortURL}</a>`;
           linkOriginalCell.textContent = link.originalURL;
           dataHoraCell.textContent = formatarData(link.createdAt);
-          acaoCell.innerHTML = '<button class="button edit" onclick="editarLink(\'' + link.id + '\')">Editar</button> <button class="button delete" onclick="deletarLink(\'' + link.id + '\')">Excluir</button>';
+          acaoCell.innerHTML = `<button class="button edit" onclick="editarLink('${link.id}')">Editar</button>
+          <button class="button delete" onclick="deletarLink('${link.id}')">Excluir</button>`;
         });
       } else {
-        // Exibe uma mensagem quando não há links disponíveis
         listaLinks.innerHTML = '<tr><td colspan="4">Nenhum link disponível</td></tr>';
       }
-    })
-    .catch(error => {
-      console.error("Ocorreu um erro ao obter os links encurtados:", error);
-    });
+    } else {
+      throw new Error(`Resposta do servidor: ${response.status}`);
+    }
+  } catch (error) {
+    console.error("Ocorreu um erro ao obter os links encurtados:", error);
+  }
 }
 
-// Função para formatar a data
+
 function formatarData(dataString) {
   const data = new Date(dataString);
   const dia = data.getDate().toString().padStart(2, '0');
@@ -415,11 +409,12 @@ function formatarData(dataString) {
   return dia + '/' + mes + '/' + ano + ' ' + horas + ':' + minutos + ':' + segundos;
 }
 
-// Função para deletar um link do Short.io
+
+
+
 function deletarLink(linkId) {
   const apiKey = "sk_qiYiSepi1LRZRj8n";
 
-  // Faz a solicitação DELETE para a API do Short.io
   fetch(`https://api.short.io/links/${linkId}`, {
     method: "DELETE",
     headers: {
@@ -428,7 +423,7 @@ function deletarLink(linkId) {
   })
     .then(response => {
       if (response.ok) {
-        // Atualiza a tabela após deletar o link
+
         exibirMensagensInicio(true, 'Link Deletado Com Sucesso!');
         getShortLinks();
       } else {
@@ -441,53 +436,83 @@ function deletarLink(linkId) {
     });
 }
 
-
-// Chama a função para obter os links encurtados quando a página é carregada
 getShortLinks();
 
+var buttons = document.getElementsByClassName("button edit");
+for (var i = 0; i < buttons.length; i++) {
+  buttons[i].addEventListener("click", function () {
+    var linkIdString = this.dataset.linkId;
+    editarLink(linkIdString);
+  });
+}
 
-async function abrirModalEdicao(linkIdString) {
-  const options = {
-    method: 'POST',
-    headers: {
-      accept: 'application/json',
-      'content-type': 'application/json',
-      Authorization: 'sk_qiYiSepi1LRZRj8n'
-    }
-  };
-
+async function editarLink(linkIdString) {
   try {
-    const response = await fetch(`https://api.short.io/links/${linkIdString}`, options);
+    console.log('Editar link:', linkIdString);
+
+    const response = await fetch(`https://api.short.io/links/${linkIdString}`, {
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+        Authorization: apiKey
+      }
+    });
+
     if (!response.ok) {
-      throw new Error('Erro na solicitação da API do Short.io');
+      throw new Error('Erro ao obter o link');
     }
-    const data = await response.json();
-    console.log('Resposta da API do Short.io:');
-    console.log(data);
-    abrirModal(data.patch);
+
+    const link = await response.json();
+    const { path, originalURL } = link;
+    exibirModal(path, originalURL, linkIdString);
   } catch (err) {
     console.error(err);
   }
 }
 
-function abrirModal(patch) {
-  // TODO: Abrir o modal de edição e preencher o campo do patch(slug)
-  console.log('Abrindo modal de edição...');
-  console.log(`Valor atual do patch(slug): ${patch}`);
-  // Aqui você pode adicionar o código para abrir o modal e preencher o campo com o valor do patch(slug)
+function exibirModal(path, originalUrl, linkIdString) {
+  const modal = document.getElementById('modalEditarLink');
+  modal.style.display = 'block';
+
+  const slugInput = document.getElementById('slug');
+  const urlInput = document.getElementById('url');
+
+  slugInput.value = path;
+  urlInput.value = originalUrl;
+
+  const salvarButton = document.querySelector('.salvar-edit');
+  salvarButton.addEventListener('click', async () => {
+    const novoSlug = slugInput.value;
+
+    try {
+      const response = await fetch(`https://api.short.io/links/${linkIdString}`, {
+        method: 'PUT',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          Authorization: apiKey
+        },
+        body: JSON.stringify({ path: novoSlug })
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao atualizar o slug do link');
+      }
+
+      console.log('Slug atualizado:', novoSlug);
+      modal.style.display = 'none';
+    } catch (err) {
+      console.error(err);
+    }
+  });
 }
 
-const elementoPai = document.getElementById('lista-de-links');
+function cancelarEdicao() {
+  var modal = document.getElementById('modalEditarLink');
+  modal.style.display = 'none';
+}
 
-elementoPai.addEventListener('click', function (event) {
-  if (event.target && event.target.id === 'editarLink') {
-    const linkIdString = event.target.getAttribute('data-link-id');
-    console.log(`Botão "editarLink" clicado. ID do link: ${linkIdString}`);
-    abrirModalEdicao(linkIdString);
-  }
+var cancelarBtn = document.getElementsByClassName('cancelar-edit')[0];
+cancelarBtn.addEventListener('click', function () {
+  cancelarEdicao();
 });
-
-
-
-
-
